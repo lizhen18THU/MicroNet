@@ -11,7 +11,7 @@ from torchstat import stat
 #     print("FLOPs: ",FLOPs)
 #     print("params: ",params)
 
-net = MicroNet.M2_Net()
+net = MicroNet.M3_Net()
 stat(net, (3, 224, 224))
 
 # import os

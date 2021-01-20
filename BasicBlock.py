@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 import DyShiftMax as DyshiftMax
 import numpy as np
 
@@ -53,7 +54,7 @@ class channelShuffle(nn.Module):
 
 
 class MicroBlockA(nn.Module):
-    def __init__(self, kernelSize, inchannel, outchannel, midchannel, G, stride):
+    def __init__(self, kernelSize, inchannel, outchannel, midchannel, G, stride, droprate):
         super(MicroBlockA, self).__init__()
         self.R = outchannel // midchannel
         expandsion_ratio = outchannel / inchannel
