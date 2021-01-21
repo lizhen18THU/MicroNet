@@ -8,7 +8,7 @@ import torch.nn.functional as F
 # 关于BN和dropout加不加，怎么加，还有
 
 class MicroNet_M0(nn.Module):
-    def __init__(self, droprate, classNum=1000):
+    def __init__(self, droprate, droprate_fc, classNum=1000):
         super(MicroNet_M0, self).__init__()
 
         self.stem = stemLayers(kernelSize=3, inchannel=3, outchannel=6, midchannel=3, G=(1, 3), stride=2,
@@ -23,7 +23,7 @@ class MicroNet_M0(nn.Module):
         self.nchannels = 576
         self.fc1 = nn.Linear(576, 576 // 4)
         # 只在全连接层加上dropout
-        self.droprate = droprate
+        self.droprate = droprate_fc
         self.fc2 = nn.Linear(576 // 4, classNum)
 
         for m in self.modules():
@@ -48,7 +48,7 @@ class MicroNet_M0(nn.Module):
 
 
 class MicroNet_M1(nn.Module):
-    def __init__(self, droprate, classNum=1000):
+    def __init__(self, droprate, droprate_fc, classNum=1000):
         super(MicroNet_M1, self).__init__()
 
         self.stem = stemLayers(kernelSize=3, inchannel=3, outchannel=8, midchannel=4, G=(1, 4), stride=2,
@@ -63,7 +63,7 @@ class MicroNet_M1(nn.Module):
         self.avg_pooling = nn.AdaptiveAvgPool2d(1)
         self.nchannels = 768
         self.fc1 = nn.Linear(768, 768 // 4)
-        self.droprate = droprate
+        self.droprate = droprate_fc
         self.fc2 = nn.Linear(768 // 4, classNum)
 
         for m in self.modules():
@@ -95,7 +95,7 @@ class MicroNet_M1(nn.Module):
 
 
 class MicroNet_M2(nn.Module):
-    def __init__(self, droprate, classNum=1000):
+    def __init__(self, droprate, droprate_fc, classNum=1000):
         super(MicroNet_M2, self).__init__()
 
         self.stem = stemLayers(kernelSize=3, inchannel=3, outchannel=12, midchannel=4, G=(1, 4), stride=2,
@@ -112,7 +112,7 @@ class MicroNet_M2(nn.Module):
         self.avg_pooling = nn.AdaptiveAvgPool2d(1)
         self.nchannels = 864
         self.fc1 = nn.Linear(864, 864 // 4)
-        self.droprate = droprate
+        self.droprate = droprate_fc
         self.fc2 = nn.Linear(864 // 4, classNum)
 
         for m in self.modules():
@@ -144,7 +144,7 @@ class MicroNet_M2(nn.Module):
 
 
 class MicroNet_M3(nn.Module):
-    def __init__(self, droprate, classNum=1000):
+    def __init__(self, droprate, droprate_fc, classNum=1000):
         super(MicroNet_M3, self).__init__()
 
         self.stem = stemLayers(kernelSize=3, inchannel=3, outchannel=16, midchannel=4, G=(1, 4), stride=2,
@@ -161,7 +161,7 @@ class MicroNet_M3(nn.Module):
         self.avg_pooling = nn.AdaptiveAvgPool2d(1)
         self.nchannels = 1024
         self.fc1 = nn.Linear(1024, 1024 // 4)
-        self.droprate = droprate
+        self.droprate = droprate_fc
         self.fc2 = nn.Linear(1024 // 4, classNum)
 
         for m in self.modules():
@@ -192,17 +192,17 @@ class MicroNet_M3(nn.Module):
         return x
 
 
-def M0_Net(droprate=0.05):
-    return MicroNet_M0(droprate=droprate)
+def M0_Net(droprate=0, droprate_fc=0.05):
+    return MicroNet_M0(droprate, droprate_fc)
 
 
-def M1_Net(droprate=0.05):
-    return MicroNet_M1(droprate=droprate)
+def M1_Net(droprate=0, droprate_fc=0.05):
+    return MicroNet_M1(droprate, droprate_fc)
 
 
-def M2_Net(droprate=0.1):
-    return MicroNet_M2(droprate=droprate)
+def M2_Net(droprate=0, droprate_fc=0.1):
+    return MicroNet_M2(droprate, droprate_fc)
 
 
-def M3_Net(droprate=0.1):
-    return MicroNet_M3(droprate=droprate)
+def M3_Net(droprate=0, droprate_fc=0.1):
+    return MicroNet_M3(droprate, droprate_fc)

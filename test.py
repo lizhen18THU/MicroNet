@@ -3,6 +3,7 @@ import torch
 from torchvision import models
 import MicroNet
 from torchstat import stat
+from thop import profile
 
 # with torch.cuda.device(0):
 #     net=MicroNet.M3_Net()
@@ -11,8 +12,13 @@ from torchstat import stat
 #     print("FLOPs: ",FLOPs)
 #     print("params: ",params)
 
-net = MicroNet.M3_Net()
-stat(net, (3, 224, 224))
+# net = MicroNet.M0_Net()
+# stat(net, (3, 224, 224))
+
+net = MicroNet.M0_Net()
+inputs = torch.randn(1, 3, 224, 224)
+flops, params = profile(net, (inputs,))
+print('flops: ', flops, 'params: ', params)
 
 # import os
 
