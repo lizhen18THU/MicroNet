@@ -206,3 +206,19 @@ def M2_Net(droprate=0, droprate_fc=0.1):
 
 def M3_Net(droprate=0, droprate_fc=0.1):
     return MicroNet_M3(droprate, droprate_fc)
+
+
+def get_MicroNet(args):
+    if args.model == "M0_Net":
+        model = M0_Net(args.droprate,
+                       args.droprate_fc) if args.droprate > 0 or args.droprate_fc > 0 else M0_Net()
+    elif args.model == "M1_Net":
+        model = M1_Net(args.droprate,
+                       args.droprate_fc) if args.droprate > 0 or args.droprate_fc > 0 else M1_Net()
+    elif args.model == "M2_Net":
+        model = M2_Net(args.droprate,
+                       args.droprate_fc) if args.droprate > 0 or args.droprate_fc > 0 else M2_Net()
+    else:
+        model = M3_Net(args.droprate,
+                       args.droprate_fc) if args.droprate > 0 or args.droprate_fc > 0 else M3_Net()
+    return model

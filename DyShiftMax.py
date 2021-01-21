@@ -3,7 +3,7 @@ import torch.nn as nn
 
 
 class DyShiftMax(nn.Module):
-    def __init__(self, channels, groups, reduction=4, J=2, K=2):
+    def __init__(self, channels, groups, reduction, J=2, K=2):
         super(DyShiftMax, self).__init__()
         self.channels = channels
         self.groups = groups

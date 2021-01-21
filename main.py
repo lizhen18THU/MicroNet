@@ -11,7 +11,7 @@ import math
 import warnings
 import MicroNet
 
-from utils import measure_model, make_log_dir
+from utils import measure_model, make_log_dir, CrossEntryLoss_onehot, mixup_data, label_Smothing
 
 parser = argparse.ArgumentParser(description='PyTorch Micro Convolutional Networks')
 parser.add_argument('--data_url', metavar='DIR', default='/home/imagenet',
@@ -51,8 +51,6 @@ parser.add_argument('--manual_seed', default=0, type=int, metavar='N',
 parser.add_argument('--gpu', default="7", type=str,
                     help='gpu available')
 
-parser.add_argument('--train_url', type=str, metavar='PATH', default='test',
-                    help='path to save result and checkpoint (default: results/savedir)')
 parser.add_argument('--name', default='basline', type=str,
                     help='name of experiment')
 parser.add_argument('--no', default='1', type=str,
@@ -64,6 +62,8 @@ parser.add_argument('--droprate', default=0, type=float,
                     help='drop out rate for conv (default: 0)')
 parser.add_argument('--droprate_fc', default=0, type=float,
                     help='drop out rate for fc (default: 0)')
+parser.add_argument('LSR_Mixup', action='store_true',
+                    help='label smothing and mixup to avoid overfitting (default: false)')
 
 parser.add_argument('--evaluate', action='store_true',
                     help='evaluate model on validation set (default: false)')
@@ -85,7 +85,6 @@ parser.add_argument('--scale_ratio', default='0.5-0.5', type=str, metavar='CONV1
 args = parser.parse_args()
 os.environ["CUDA_VISIBLE_DEVICES"] = args.gpu
 
-
 if args.dataset == 'cifar10':
     args.num_classes = 10
 elif args.dataset == 'cifar100':
@@ -103,6 +102,8 @@ import torch.optim
 import torch.utils.data
 import torchvision.transforms as transforms
 import torchvision.datasets as datasets
+import torchvision.models.resnet
+from torch.autograd import Variable
 
 torch.manual_seed(args.manual_seed)
 torch.cuda.manual_seed_all(args.manual_seed)
@@ -116,18 +117,7 @@ def main():
     global args, best_acc1
 
     ### Calculate FLOPs & Param
-    if args.model == "M0_Net":
-        model = MicroNet.M0_Net(args.droprate,
-                                args.droprate) if args.droprate > 0 or args.droprate_fc > 0 else MicroNet.M0_Net()
-    elif args.model=="M1_Net":
-        model = MicroNet.M1_Net(args.droprate,
-                                args.droprate) if args.droprate > 0 or args.droprate_fc > 0 else MicroNet.M1_Net()
-    elif args.model=="M2_Net":
-        model = MicroNet.M2_Net(args.droprate,
-                                args.droprate) if args.droprate > 0 or args.droprate_fc > 0 else MicroNet.M2_Net()
-    else:
-        model = MicroNet.M3_Net(args.droprate,
-                                args.droprate) if args.droprate > 0 or args.droprate_fc > 0 else MicroNet.M3_Net()
+    model = MicroNet.get_MicroNet(args)
 
     # print('Start Converting ...')
     # convert_model(model, args)
@@ -155,10 +145,18 @@ def main():
 
     fd.close()
 
+    del (model)
+
+    # model = MicroNet.get_MicroNet(args)
+    model=torchvision.models.shufflenet_v2_x0_5()
     model.cuda()
 
     ### Define loss function (criterion) and optimizer
-    criterion = nn.CrossEntropyLoss().cuda()
+    if args.LSR_Mixup:
+        criterion = CrossEntryLoss_onehot().cuda()
+    else:
+        criterion = nn.CrossEntropyLoss().cuda()
+    criterion_temper = nn.CrossEntropyLoss().cuda()  # forvalidation
     optimizer = torch.optim.SGD(model.parameters(), args.lr,
                                 momentum=args.momentum,
                                 weight_decay=args.weight_decay,
@@ -172,7 +170,6 @@ def main():
             best_acc1 = checkpoint['best_acc1']
             model.load_state_dict(checkpoint['state_dict'])
             optimizer.load_state_dict(checkpoint['optimizer'])
-
 
     cudnn.benchmark = True
 
@@ -237,8 +234,9 @@ def main():
         num_workers=args.workers, pin_memory=False)
 
     if args.evaluate:
+        criterion_temper = nn.CrossEntropyLoss.cuda()
         validate(val_loader, model,
-                 criterion)  # TODO: validate must before measure_model otherwise result be worese, but I don't know why
+                 criterion_temper)  # TODO: validate must before measure_model otherwise result be worese, but I don't know why
         n_flops, n_params = measure_model(model, IMAGE_SIZE, IMAGE_SIZE)
         fd = open(args.record_file, 'a')
         print('FLOPs: %.2fM, Params: %.2fM' % (n_flops / 1e6, n_params / 1e6))
@@ -250,10 +248,10 @@ def main():
     for epoch in range(args.start_epoch, args.epochs):
         ### Train for one epoch
         tr_acc1, tr_acc5, tr_loss, lr = \
-            train(train_loader, model, criterion, optimizer, epoch)
+            train(train_loader, model, criterion, optimizer, epoch, args)
 
         ### Evaluate on validation set
-        val_acc1, val_acc5, val_loss = validate(val_loader, model, criterion)
+        val_acc1, val_acc5, val_loss = validate(val_loader, model, criterion_temper)
 
         ### Remember best Acc@1 and save checkpoint
         is_best = val_acc1 > best_acc1
@@ -284,7 +282,7 @@ def main():
     # convert_model(model, args)
     # print('Converting End!')
     print('Model Struture:', str(model))
-    validate(val_loader, model, criterion)
+    validate(val_loader, model, criterion_temper)
     n_flops, n_params = measure_model(model, IMAGE_SIZE, IMAGE_SIZE)
     print('FLOPs: %.2fM, Params: %.2fM' % (n_flops / 1e6, n_params / 1e6))
 
@@ -296,7 +294,7 @@ def main():
     return
 
 
-def train(train_loader, model, criterion, optimizer, epoch):
+def train(train_loader, model, criterion, optimizer, epoch, args):
     batch_time = AverageMeter()
     data_time = AverageMeter()
     losses = AverageMeter()
@@ -310,8 +308,6 @@ def train(train_loader, model, criterion, optimizer, epoch):
 
     end = time.time()
     for i, (input, target) in enumerate(train_loader):
-        progress = float(epoch * len(train_loader) + i) / (args.epochs * len(train_loader))
-        args.progress = progress
         ### Adjust learning rate
         lr = adjust_learning_rate(optimizer, epoch, args, batch=i,
                                   nBatch=len(train_loader), method=args.lr_type)
@@ -324,11 +320,14 @@ def train(train_loader, model, criterion, optimizer, epoch):
         # target = target.cuda(non_blocking=True)
         # input_var = torch.autograd.Variable(input)
         # target_var = torch.autograd.Variable(target)
-        input = input.cuda(non_blocking=True)
-        target = target.cuda(non_blocking=True)
+        if args.LSR_Mixup:
+            input, target = mixup_data(input, target)
+            target = label_Smothing(target)
+        input = Variable(input.cuda(non_blocking=True))
+        target = Variable(target.cuda(non_blocking=True))
 
         ### Compute output
-        output = model(input, progress)
+        output = model(input)
         loss = criterion(output, target)
 
         ### Measure accuracy and record loss
@@ -379,8 +378,8 @@ def validate(val_loader, model, criterion):
             # target = target.cuda(non_blocking=True)
             # input_var = torch.autograd.Variable(input, volatile=True)
             # target_var = torch.autograd.Variable(target, volatile=True)
-            input = input.cuda(non_blocking=True)
-            target = target.cuda(non_blocking=True)
+            input = Variable(input.cuda(non_blocking=True))
+            target = Variable(target.cuda(non_blocking=True))
 
             ### Compute output
             output = model(input)

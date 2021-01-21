@@ -10,6 +10,46 @@ import torch.nn as nn
 from torch.autograd import Variable
 from functools import reduce
 import operator
+import numpy as np
+import torch.nn.functional as F
+
+
+def onehot_encoding(labels, n_classes):
+    return torch.zeros(labels.size(0), n_classes).scatter_(dim=1, index=labels.view(-1, 1), value=1)
+
+
+def mixup_data(input, target, alpha=0.2, n_classes=1000):
+    if alpha > 0.:
+        lam = np.random.beta(alpha, alpha)
+    else:
+        lam = 1.
+    batch_size = input.size()[0]
+    index = torch.randperm(batch_size)
+
+    mixed_input = lam * input + (1 - lam) * input[index, :]  # 自己和打乱的自己进行叠加
+    target_a, target_b = onehot_encoding(target, n_classes), onehot_encoding(target[index], n_classes)
+    mixed_target = lam * target_a + (1 - lam) * target_b
+    return mixed_input, mixed_target
+
+
+def label_Smothing(targets, epsilon=0.1):
+    n_classes = targets.size(1)
+    targets = targets * (1 - epsilon) + torch.ones_like(targets) * epsilon / n_classes
+    return targets
+
+
+class CrossEntryLoss_onehot(nn.Module):
+    def __init__(self):
+        super(CrossEntryLoss_onehot, self).__init__()
+
+    def forward(self, preds, targets, reduction='mean'):
+        assert reduction in ["mean", "sum"]
+        logp = F.log_softmax(preds, dim=1)
+        loss = torch.sum(-logp * targets, dim=1)
+        if reduction == "mean":
+            return loss.mean()
+        else:
+            return loss.sum()
 
 
 def measure_model(model, IMAGE_SIZE1, IMAGE_SIZE2):
@@ -37,6 +77,7 @@ def make_log_dir(args):
         mox.file.make_dirs(log_path)
         return log_path
 
+
 # count_ops = 0
 # count_params = 0
 #
@@ -61,41 +102,25 @@ def make_log_dir(args):
 #     return get_layer_info(model) in ['MscaleConv_v1', 'MscaleConv_v2', 'MscaleConv_v3']
 #
 #
-# def convert_model(model, args):
-#     for m in model._modules:
-#         child = model._modules[m]
-#         if is_leaf(child):
-#             if isinstance(child, nn.Linear):
-#                 model._modules[m] = CondensingLinear(child, 0.5)
-#                 del(child)
-#         elif is_pruned(child):
-#             if get_layer_info(child) == 'LearnedGroupConv':
-#                 model._modules[m] = CondensingConv(child)
-#             del(child)
-#         else:
-#             convert_model(child, args)
-#
-#
-# def get_bn_value(model, args):
-#     for child in model.children():
-#         # print('Layer is', get_layer_info(child))
-#         if get_layer_info(child) == '_DenseBlock':
-#             print('###################################################DenseBlock###################################################')
-#         if get_layer_info(child) == 'Conv':
-#             # print(child.norm.weight.size())
-#             # print(child.norm.bias.size())
-#             print('****************************************************************************************************************')
-#             print('--------Weight Size--------:', child.norm.weight.size())
-#             for i in range(args.group_1x1):
-#                 print('--------Group ' + str(i) + ' Weight--------:', child.norm.weight[i::args.group_1x1])
-#                 print('Weight Mean:', torch.mean(child.norm.weight[i::args.group_1x1]))
-#                 print('Weight Std :', torch.std(child.norm.weight[i::args.group_1x1]))
-#             # print('---------Bias---------:', child.norm.bias)
-#             # print('-----Running Mean-----:', child.norm.running_mean)
-#             # print('-----Running Var------:', child.norm.running_var)
-#         if not is_leaf(child):
-#             get_bn_value(child, args)
-#
+# # def get_bn_value(model, args):
+# #     for child in model.children():
+# #         # print('Layer is', get_layer_info(child))
+# #         if get_layer_info(child) == '_DenseBlock':
+# #             print('###################################################DenseBlock###################################################')
+# #         if get_layer_info(child) == 'Conv':
+# #             # print(child.norm.weight.size())
+# #             # print(child.norm.bias.size())
+# #             print('****************************************************************************************************************')
+# #             print('--------Weight Size--------:', child.norm.weight.size())
+# #             for i in range(args.group_1x1):
+# #                 print('--------Group ' + str(i) + ' Weight--------:', child.norm.weight[i::args.group_1x1])
+# #                 print('Weight Mean:', torch.mean(child.norm.weight[i::args.group_1x1]))
+# #                 print('Weight Std :', torch.std(child.norm.weight[i::args.group_1x1]))
+# #             # print('---------Bias---------:', child.norm.bias)
+# #             # print('-----Running Mean-----:', child.norm.running_mean)
+# #             # print('-----Running Var------:', child.norm.running_var)
+# #         if not is_leaf(child):
+# #             get_bn_value(child, args)
 #
 #
 # def get_layer_info(layer):
@@ -123,8 +148,8 @@ def make_log_dir(args):
 #                     layer.stride[0] + 1)
 #         out_w = int((x.size()[3] + 2 * layer.padding[1] - layer.kernel_size[1]) /
 #                     layer.stride[1] + 1)
-#         delta_ops = layer.in_channels * layer.out_channels * layer.kernel_size[0] *  \
-#                 layer.kernel_size[1] * out_h * out_w / layer.groups * multi_add
+#         delta_ops = layer.in_channels * layer.out_channels * layer.kernel_size[0] * \
+#                     layer.kernel_size[1] * out_h * out_w / layer.groups * multi_add
 #         delta_params = get_layer_param(layer)
 #
 #     ### ops_learned_conv
@@ -137,7 +162,7 @@ def make_log_dir(args):
 #         out_w = int((x.size()[3] + 2 * conv.padding[1] - conv.kernel_size[1]) /
 #                     conv.stride[1] + 1)
 #         delta_ops += conv.in_channels * conv.out_channels * conv.kernel_size[0] * \
-#                 conv.kernel_size[1] * out_h * out_w / layer.condense_factor * multi_add
+#                      conv.kernel_size[1] * out_h * out_w / layer.condense_factor * multi_add
 #         delta_params = get_layer_param(conv) / layer.condense_factor
 #
 #     ### ops_learned_conv
@@ -203,7 +228,7 @@ def make_log_dir(args):
 #             # print('LearnedMScaleGroupConv scale:%d, conv ops:%d' % (i, conv.in_channels * (conv.out_channels / groups) * conv.kernel_size[0] * conv.kernel_size[1] * out_h * out_w / layer.condense_factor * multi_add))
 #         delta_params = get_layer_param(conv) / layer.condense_factor
 #
-#     elif type_name in ['MscaleConv_v1' , 'MscaleConv_v3']:
+#     elif type_name in ['MscaleConv_v1', 'MscaleConv_v3']:
 #         conv = layer.conv
 #         groups = layer.groups
 #         for i in range(layer.scale):
@@ -213,12 +238,12 @@ def make_log_dir(args):
 #             # print('MscaleConv scale:%d, out_h:%d, out_w:%d' % (i, out_h, out_w))
 #             if layer.groups > 1:
 #                 delta_ops += (conv.in_channels / groups) * (conv.out_channels / groups) * conv.kernel_size[0] * \
-#                      conv.kernel_size[1] * out_h * out_w * multi_add
+#                              conv.kernel_size[1] * out_h * out_w * multi_add
 #                 # print('MscaleConv scale:%d, conv ops:%d' % (i, (conv.in_channels / groups) * (conv.out_channels / groups) * conv.kernel_size[0] * \
 #                 #      conv.kernel_size[1] * out_h * out_w * multi_add))
 #             else:
 #                 delta_ops += (conv.in_channels / layer.scale) * conv.out_channels * conv.kernel_size[0] * \
-#                      conv.kernel_size[1] * out_h * out_w * multi_add
+#                              conv.kernel_size[1] * out_h * out_w * multi_add
 #                 # print('MscaleConv scale:%d, conv ops:%d' % (
 #                 # i, (conv.in_channels / layer.scale) * conv.out_channels * conv.kernel_size[0] * \
 #                 #      conv.kernel_size[1] * out_h * out_w * multi_add))
@@ -233,7 +258,7 @@ def make_log_dir(args):
 #             out_h, out_w = x[i].size()[2:]
 #             # print('MscaleConv scale:%d, out_h:%d, out_w:%d' % (i, out_h, out_w))
 #             delta_ops += (conv.in_channels / groups) * (conv.out_channels / groups) * conv.kernel_size[0] * \
-#                  conv.kernel_size[1] * out_h * out_w * multi_add
+#                          conv.kernel_size[1] * out_h * out_w * multi_add
 #             # print('MscaleConv scale:%d, conv ops:%d' % (i, (conv.in_channels / groups) * (conv.out_channels / groups) * conv.kernel_size[0] * \
 #             #      conv.kernel_size[1] * out_h * out_w * multi_add))
 #
@@ -293,7 +318,9 @@ def make_log_dir(args):
 #                     def lambda_forward(x):
 #                         measure_layer(m, x)
 #                         return m.old_forward(x)
+#
 #                     return lambda_forward
+#
 #                 child.old_forward = child.forward
 #                 child.forward = new_forward(child)
 #             else:
