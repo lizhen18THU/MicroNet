@@ -48,7 +48,7 @@ parser.add_argument('--no_save_model', dest='no_save_model', action='store_true'
                     help='only save best model (default: false)')
 parser.add_argument('--manual_seed', default=0, type=int, metavar='N',
                     help='manual seed (default: 0)')
-parser.add_argument('--gpu', default="7", type=str,
+parser.add_argument('--gpu', default="1", type=str,
                     help='gpu available')
 
 parser.add_argument('--name', default='basline', type=str,
@@ -62,7 +62,7 @@ parser.add_argument('--droprate', default=0, type=float,
                     help='drop out rate for conv (default: 0)')
 parser.add_argument('--droprate_fc', default=0, type=float,
                     help='drop out rate for fc (default: 0)')
-parser.add_argument('LSR_Mixup', action='store_true',
+parser.add_argument('--LSR_Mixup', action='store_true',
                     help='label smothing and mixup to avoid overfitting (default: false)')
 
 parser.add_argument('--evaluate', action='store_true',
@@ -100,9 +100,9 @@ import torch.nn.parallel
 import torch.backends.cudnn as cudnn
 import torch.optim
 import torch.utils.data
+import torchvision
 import torchvision.transforms as transforms
 import torchvision.datasets as datasets
-import torchvision.models.resnet
 from torch.autograd import Variable
 
 torch.manual_seed(args.manual_seed)

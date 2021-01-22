@@ -16,12 +16,14 @@ class stemLayers(nn.Module):
         # 1*3conv
         self.conv2 = nn.Conv2d(midchannel, outchannel, (1, kernelSize), stride=(1, stride),
                                padding=(0, (kernelSize - 1) // 2), groups=G[1], bias=False)
+        self.bn = nn.BatchNorm2d(outchannel)
         self.relu = nn.ReLU(inplace=True)
         self.droprate = droprate
 
     def forward(self, x):
         x = self.conv1(x)
         x = self.conv2(x)
+        x = self.bn(x)
         x = self.relu(x)
         if self.droprate > 0:
             x = F.dropout(x, p=self.droprate, training=self.training)
@@ -73,6 +75,7 @@ class MicroBlockA(nn.Module):
         # macro-factorized pointwise conv
         self.facpoint_conv = nn.Conv2d(outchannel, midchannel, kernel_size=1, groups=G[0], bias=False)
         self.point_chanShuffle = channelShuffle(G[0])
+        self.bn = nn.BatchNorm2d(midchannel)
         self.dysmax2 = DyshiftMax.DyShiftMax(midchannel, G[0], min(midchannel // 4, 4))
         self.droprate = droprate
 
@@ -80,7 +83,7 @@ class MicroBlockA(nn.Module):
         x = self.facdep_conv1(x)
         x = self.facdep_conv2(x)
         x = self.dysmax1(x)
-        x = self.dysmax2(self.point_chanShuffle(self.facpoint_conv(x)))
+        x = self.dysmax2(self.bn(self.point_chanShuffle(self.facpoint_conv(x))))
         if self.droprate > 0:
             x = F.dropout(x, p=self.droprate, training=self.training)
         return x
@@ -105,6 +108,7 @@ class MicroBlockB(nn.Module):
         self.point_chanShuffle = channelShuffle(G[0])
         self.dysmax2 = DyshiftMax.DyShiftMax(midchannel, G[0], min(midchannel // 4, 4))
         self.facpoint_conv2 = nn.Conv2d(midchannel, outchannel, kernel_size=1, groups=G[1], bias=False)
+        self.bn=nn.BatchNorm2d(outchannel)
         self.dysmax3 = DyshiftMax.DyShiftMax(outchannel, G[1], self.R)
         self.droprate = droprate
 
@@ -113,7 +117,7 @@ class MicroBlockB(nn.Module):
         x = self.facdep_conv2(x)
         x = self.dysmax1(x)
         x = self.dysmax2(self.point_chanShuffle(self.facpoint_conv1(x)))
-        x = self.dysmax3(self.facpoint_conv2(x))
+        x = self.dysmax3(self.bn(self.facpoint_conv2(x)))
         if self.droprate > 0:
             x = F.dropout(x, p=self.droprate, training=self.training)
         return x
@@ -138,6 +142,7 @@ class MicroBlockC(nn.Module):
         self.point_chanShuffle = channelShuffle(G[0])
         self.dysmax2 = DyshiftMax.DyShiftMax(midchannel, G[0], min(midchannel // 4, 4))
         self.facpoint_conv2 = nn.Conv2d(midchannel, outchannel, kernel_size=1, groups=G[1], bias=False)
+        self.bn=nn.BatchNorm2d(outchannel)
         self.dysmax3 = DyshiftMax.DyShiftMax(outchannel, G[1], self.R)
         self.droprate = droprate
 
@@ -146,9 +151,9 @@ class MicroBlockC(nn.Module):
         out = self.facdep_conv2(out)
         out = self.dysmax1(out)
         out = self.dysmax2(self.point_chanShuffle(self.facpoint_conv1(out)))
-        out = self.dysmax3(self.facpoint_conv2(out))
+        out = self.dysmax3(self.bn(self.facpoint_conv2(out)))
         if self.droprate > 0:
-            x = F.dropout(x, p=self.droprate, training=self.training)
+            out = F.dropout(out, p=self.droprate, training=self.training)
 
         if self.inchannel == self.outchannel:
             out += x

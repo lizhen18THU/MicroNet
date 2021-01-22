@@ -23,7 +23,7 @@ class MicroNet_M0(nn.Module):
         self.nchannels = 576
         self.fc1 = nn.Linear(576, 576 // 4)
         # 只在全连接层加上dropout
-        self.droprate = droprate_fc
+        self.droprate_fc = droprate_fc
         self.fc2 = nn.Linear(576 // 4, classNum)
 
         for m in self.modules():
@@ -40,8 +40,8 @@ class MicroNet_M0(nn.Module):
         x = self.avg_pooling(x)
         x = x.view(-1, self.nchannels)
         x = self.fc1(x)
-        if self.droprate > 0:
-            x = F.dropout(x, p=self.droprate, training=self.training)
+        if self.droprate_fc > 0:
+            x = F.dropout(x, p=self.droprate_fc, training=self.training)
         x = self.fc2(x)
 
         return x
@@ -63,7 +63,7 @@ class MicroNet_M1(nn.Module):
         self.avg_pooling = nn.AdaptiveAvgPool2d(1)
         self.nchannels = 768
         self.fc1 = nn.Linear(768, 768 // 4)
-        self.droprate = droprate_fc
+        self.droprate_fc = droprate_fc
         self.fc2 = nn.Linear(768 // 4, classNum)
 
         for m in self.modules():
@@ -87,8 +87,8 @@ class MicroNet_M1(nn.Module):
         x = self.avg_pooling(x)
         x = x.view(-1, self.nchannels)
         x = self.fc1(x)
-        if self.droprate > 0:
-            x = F.dropout(x, p=self.droprate, training=self.training)
+        if self.droprate_fc > 0:
+            x = F.dropout(x, p=self.droprate_fc, training=self.training)
         x = self.fc2(x)
 
         return x
@@ -112,7 +112,7 @@ class MicroNet_M2(nn.Module):
         self.avg_pooling = nn.AdaptiveAvgPool2d(1)
         self.nchannels = 864
         self.fc1 = nn.Linear(864, 864 // 4)
-        self.droprate = droprate_fc
+        self.droprate_fc = droprate_fc
         self.fc2 = nn.Linear(864 // 4, classNum)
 
         for m in self.modules():
@@ -136,8 +136,8 @@ class MicroNet_M2(nn.Module):
         x = self.avg_pooling(x)
         x = x.view(-1, self.nchannels)
         x = self.fc1(x)
-        if self.droprate > 0:
-            x = F.dropout(x, p=self.droprate, training=self.training)
+        if self.droprate_fc > 0:
+            x = F.dropout(x, p=self.droprate_fc, training=self.training)
         x = self.fc2(x)
 
         return x
@@ -161,7 +161,7 @@ class MicroNet_M3(nn.Module):
         self.avg_pooling = nn.AdaptiveAvgPool2d(1)
         self.nchannels = 1024
         self.fc1 = nn.Linear(1024, 1024 // 4)
-        self.droprate = droprate_fc
+        self.droprate_fc = droprate_fc
         self.fc2 = nn.Linear(1024 // 4, classNum)
 
         for m in self.modules():
@@ -185,8 +185,8 @@ class MicroNet_M3(nn.Module):
         x = self.avg_pooling(x)
         x = x.view(-1, self.nchannels)
         x = self.fc1(x)
-        if self.droprate > 0:
-            x = F.dropout(x, p=self.droprate, training=self.training)
+        if self.droprate_fc > 0:
+            x = F.dropout(x, p=self.droprate_fc, training=self.training)
         x = self.fc2(x)
 
         return x

@@ -12,15 +12,15 @@ from thop import profile
 #     print("FLOPs: ",FLOPs)
 #     print("params: ",params)
 
-net = models.shufflenet_v2_x1_0()
+net = models.shufflenet_v2_x0_5()
 # stat(net, (3, 224, 224))
 # loss=torch.nn.CrossEntropyLoss()
 
 
-# net = MicroNet.M0_Net()
+# net = MicroNet.M1_Net()
 inputs = torch.randn(1, 3, 224, 224)
 flops, params = profile(net, (inputs,))
-print('flops: ', flops, 'params: ', params)
+print('flops: ', flops / 1e6, ' M  ', 'params: ', params / 1e6, 'M')
 
 # import os
 
