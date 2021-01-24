@@ -83,9 +83,9 @@ class MicroBlockA(nn.Module):
         x = self.facdep_conv1(x)
         x = self.facdep_conv2(x)
         x = self.dysmax1(x)
-        x = self.dysmax2(self.bn(self.point_chanShuffle(self.facpoint_conv(x))))
         if self.droprate > 0:
             x = F.dropout(x, p=self.droprate, training=self.training)
+        x = self.dysmax2(self.bn(self.point_chanShuffle(self.facpoint_conv(x))))
         return x
 
 
@@ -116,10 +116,10 @@ class MicroBlockB(nn.Module):
         x = self.facdep_conv1(x)
         x = self.facdep_conv2(x)
         x = self.dysmax1(x)
-        x = self.dysmax2(self.point_chanShuffle(self.facpoint_conv1(x)))
-        x = self.dysmax3(self.bn(self.facpoint_conv2(x)))
         if self.droprate > 0:
             x = F.dropout(x, p=self.droprate, training=self.training)
+        x = self.dysmax2(self.point_chanShuffle(self.facpoint_conv1(x)))
+        x = self.dysmax3(self.bn(self.facpoint_conv2(x)))
         return x
 
 
@@ -150,10 +150,10 @@ class MicroBlockC(nn.Module):
         out = self.facdep_conv1(x)
         out = self.facdep_conv2(out)
         out = self.dysmax1(out)
-        out = self.dysmax2(self.point_chanShuffle(self.facpoint_conv1(out)))
-        out = self.dysmax3(self.bn(self.facpoint_conv2(out)))
         if self.droprate > 0:
             out = F.dropout(out, p=self.droprate, training=self.training)
+        out = self.dysmax2(self.point_chanShuffle(self.facpoint_conv1(out)))
+        out = self.dysmax3(self.bn(self.facpoint_conv2(out)))
 
         if self.inchannel == self.outchannel:
             out += x

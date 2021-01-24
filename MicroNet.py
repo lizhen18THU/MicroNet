@@ -77,7 +77,7 @@ class MicroNet_M1(nn.Module):
         layers = []
         layers.append(MicroBlockC(kernelSize, inchannel, outchannel, midchannel, G, stride, droprate))
         for i in range(1, numbers):
-            layers.append((MicroBlockC(kernelSize, outchannel, outchannel, midchannel, G, 1, droprate)))
+            layers.append(MicroBlockC(kernelSize, outchannel, outchannel, midchannel, G, 1, droprate))
         return nn.Sequential(*layers)
 
     def forward(self, x):
@@ -126,7 +126,7 @@ class MicroNet_M2(nn.Module):
         layers = []
         layers.append(MicroBlockC(kernelSize, inchannel, outchannel, midchannel, G, stride, droprate))
         for i in range(1, numbers):
-            layers.append((MicroBlockC(kernelSize, outchannel, outchannel, midchannel, G, 1, droprate)))
+            layers.append(MicroBlockC(kernelSize, outchannel, outchannel, midchannel, G, 1, droprate))
         return nn.Sequential(*layers)
 
     def forward(self, x):
@@ -175,7 +175,7 @@ class MicroNet_M3(nn.Module):
         layers = []
         layers.append(MicroBlockC(kernelSize, inchannel, outchannel, midchannel, G, stride, droprate))
         for i in range(1, numbers):
-            layers.append((MicroBlockC(kernelSize, outchannel, outchannel, midchannel, G, 1, droprate)))
+            layers.append(MicroBlockC(kernelSize, outchannel, outchannel, midchannel, G, 1, droprate))
         return nn.Sequential(*layers)
 
     def forward(self, x):
