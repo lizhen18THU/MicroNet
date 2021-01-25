@@ -48,7 +48,7 @@ parser.add_argument('--no_save_model', dest='no_save_model', action='store_true'
                     help='only save best model (default: false)')
 parser.add_argument('--manual_seed', default=0, type=int, metavar='N',
                     help='manual seed (default: 0)')
-parser.add_argument('--gpu', default="0,1,2,3,4,5,6,7", type=str,
+parser.add_argument('--gpu', default="7", type=str,
                     help='gpu available')
 
 parser.add_argument('--name', default='basline', type=str,
