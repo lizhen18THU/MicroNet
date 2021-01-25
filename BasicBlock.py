@@ -70,7 +70,7 @@ class MicroBlockA(nn.Module):
                                       padding=((kernelSize - 1) // 2, 0), groups=inchannel, bias=False)
         self.facdep_conv2 = nn.Conv2d(inchannel * r1, inchannel * r1 * r2, (1, kernelSize), stride=(1, stride),
                                       padding=(0, (kernelSize - 1) // 2), groups=inchannel * r1, bias=False)
-        self.dysmax1 = DyshiftMax.DyShiftMax(outchannel, inchannel, self.R)
+        self.dysmax1 = DyshiftMax.DyShiftMax(outchannel, inchannel, min(midchannel // 4, 4))
 
         # macro-factorized pointwise conv
         self.facpoint_conv = nn.Conv2d(outchannel, midchannel, kernel_size=1, groups=G[0], bias=False)
@@ -101,7 +101,7 @@ class MicroBlockB(nn.Module):
                                       padding=((kernelSize - 1) // 2, 0), groups=inchannel, bias=False)
         self.facdep_conv2 = nn.Conv2d(inchannel * r1, inchannel * r1 * r2, (1, kernelSize), stride=(1, stride),
                                       padding=(0, (kernelSize - 1) // 2), groups=inchannel * r1, bias=False)
-        self.dysmax1 = DyshiftMax.DyShiftMax(outchannel, inchannel, self.R)
+        self.dysmax1 = DyshiftMax.DyShiftMax(outchannel, inchannel, min(midchannel // 4, 4))
 
         # macro-factorized pointwise conv
         self.facpoint_conv1 = nn.Conv2d(outchannel, midchannel, kernel_size=1, groups=G[0], bias=False)
@@ -109,7 +109,7 @@ class MicroBlockB(nn.Module):
         self.dysmax2 = DyshiftMax.DyShiftMax(midchannel, G[0], min(midchannel // 4, 4))
         self.facpoint_conv2 = nn.Conv2d(midchannel, outchannel, kernel_size=1, groups=G[1], bias=False)
         self.bn=nn.BatchNorm2d(outchannel)
-        self.dysmax3 = DyshiftMax.DyShiftMax(outchannel, G[1], self.R)
+        self.dysmax3 = DyshiftMax.DyShiftMax(outchannel, G[1], min(midchannel // 4, 4))
         self.droprate = droprate
 
     def forward(self, x):
@@ -143,7 +143,7 @@ class MicroBlockC(nn.Module):
         self.dysmax2 = DyshiftMax.DyShiftMax(midchannel, G[0], min(midchannel // 4, 4))
         self.facpoint_conv2 = nn.Conv2d(midchannel, outchannel, kernel_size=1, groups=G[1], bias=False)
         self.bn=nn.BatchNorm2d(outchannel)
-        self.dysmax3 = DyshiftMax.DyShiftMax(outchannel, G[1], self.R)
+        self.dysmax3 = DyshiftMax.DyShiftMax(outchannel, G[1], min(midchannel // 4, 4))
         self.droprate = droprate
 
     def forward(self, x):

@@ -45,4 +45,4 @@ class DyShiftMax(nn.Module):
                                         dim=1).permute(2, 3, 0, 1).unsqueeze(-1) * relu_coefs[:, :, j, :]
         output = torch.max(x_temp, dim=-1)[0].permute(2, 3, 0, 1)
 
-        return output
+        return output.contiguous()
