@@ -16,9 +16,18 @@ from thop import profile
 # stat(net, (3, 224, 224))
 # loss=torch.nn.CrossEntropyLoss()
 
-x = torch.Tensor(2,3)
-y = x.permute(1,0).contiguous()
-y.view(-1)
+import argparse
+
+parser = argparse.ArgumentParser(description='PyTorch Micro Convolutional Networks')
+args = parser.parse_args()
+args.filename = "test"
+
+
+def test(args):
+    print(args.filename)
+
+
+test(args)
 
 # net = MicroNet.M1_Net()
 # inputs = torch.randn(1, 3, 224, 224)

@@ -117,47 +117,32 @@ args.record_file = args.train_url + 'training_process.txt'
 
 def main():
     global args, best_acc1
+    args.filename = 'log.txt'
+    if args.dataset in ['cifar10', 'cifar100']:
+        IMAGE_SIZE = 32
+    else:
+        IMAGE_SIZE = 224
+    fd = open(args.record_file, 'a')
 
-    ### Calculate FLOPs & Param
+    print('Args Config:', str(args))
+    fd.write(str(args) + '\n')
     if args.continue_train:
-        fd = open(args.record_file, 'a')
-
         print("Continue training!")
         fd.write("Continue training!" + "\n")
-
-        print('Args Config:', str(args))
-        fd.write(str(args) + '\n')
-
-        fd.close()
+    ### Calculate FLOPs & Param
     else:
         model = MicroNet.get_MicroNet(args)
 
-        # print('Start Converting ...')
-        # convert_model(model, args)
-        # print('Converting End!')
-
-        if args.dataset in ['cifar10', 'cifar100']:
-            IMAGE_SIZE = 32
-        else:
-            IMAGE_SIZE = 224
-
-        args.filename = 'log.txt'
-
         n_flops, n_params = measure_model(model, IMAGE_SIZE, IMAGE_SIZE)
-        fd = open(args.record_file, 'a')
-
-        print('Args Config:', str(args))
-        fd.write(str(args) + '\n')
 
         print('FLOPs: %.2fM, Params: %.2fM' % (n_flops / 1e6, n_params / 1e6))
         fd.write('FLOPs: %.2fM, Params: %.2fM' % (n_flops / 1e6, n_params / 1e6) + '\n')
 
         print('Model Struture:', str(model))
         fd.write(str(model) + '\n')
-
-        fd.close()
-
         del (model)
+
+    fd.close()
 
     # model = MicroNet.get_MicroNet(args)
     model = MicroNet.get_MicroNet(args)
