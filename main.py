@@ -64,6 +64,8 @@ parser.add_argument('--droprate_fc', default=0, type=float,
                     help='drop out rate for fc (default: 0)')
 parser.add_argument('--LSR_Mixup', action='store_true',
                     help='label smothing and mixup to avoid overfitting (default: false)')
+parser.add_argument('--continue', action='store_true',
+                    help='continue training (default: false)')
 
 parser.add_argument('--evaluate', action='store_true',
                     help='evaluate model on validation set (default: false)')
