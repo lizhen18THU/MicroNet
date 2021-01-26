@@ -64,7 +64,7 @@ def make_log_dir(args):
         log_path = os.path.expanduser('~/lizhen_MicroNet_temper/MicroNet_log/') + str(args.dataset) \
                    + '_' + str(args.name) \
                    + '/' + 'no_' + str(args.no) + '/'
-        if not args.contine:
+        if not args.continue_train:
             while os.path.exists(log_path):
                 args.no = int(args.no) + 1
                 log_path = os.path.expanduser('~/lizhen_MicroNet_temper/MicroNet_log/') + str(args.dataset) \

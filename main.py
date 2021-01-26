@@ -64,7 +64,7 @@ parser.add_argument('--droprate_fc', default=0, type=float,
                     help='drop out rate for fc (default: 0)')
 parser.add_argument('--LSR_Mixup', action='store_true',
                     help='label smothing and mixup to avoid overfitting (default: false)')
-parser.add_argument('--continue', action='store_true',
+parser.add_argument('--continue_train', action='store_true',
                     help='continue training (default: false)')
 
 parser.add_argument('--evaluate', action='store_true',
@@ -119,35 +119,45 @@ def main():
     global args, best_acc1
 
     ### Calculate FLOPs & Param
-    model = MicroNet.get_MicroNet(args)
+    if args.continue_train:
+        fd = open(args.record_file, 'a')
 
-    # print('Start Converting ...')
-    # convert_model(model, args)
-    # print('Converting End!')
+        print("Continue training!")
+        fd.write("Continue training!" + "\n")
 
-    if args.dataset in ['cifar10', 'cifar100']:
-        IMAGE_SIZE = 32
+        print('Args Config:', str(args))
+        fd.write(str(args) + '\n')
+
+        fd.close()
     else:
-        IMAGE_SIZE = 224
+        model = MicroNet.get_MicroNet(args)
 
-    args.filename = 'log.txt'
+        # print('Start Converting ...')
+        # convert_model(model, args)
+        # print('Converting End!')
 
-    n_flops, n_params = measure_model(model, IMAGE_SIZE, IMAGE_SIZE)
-    # print('FLOPs: %.2fM, Params: %.2fM' % (n_flops / 1e6, n_params / 1e6))
-    fd = open(args.record_file, 'a')
+        if args.dataset in ['cifar10', 'cifar100']:
+            IMAGE_SIZE = 32
+        else:
+            IMAGE_SIZE = 224
 
-    print('Args Config:', str(args))
-    fd.write(str(args) + '\n')
+        args.filename = 'log.txt'
 
-    print('FLOPs: %.2fM, Params: %.2fM' % (n_flops / 1e6, n_params / 1e6))
-    fd.write('FLOPs: %.2fM, Params: %.2fM' % (n_flops / 1e6, n_params / 1e6) + '\n')
+        n_flops, n_params = measure_model(model, IMAGE_SIZE, IMAGE_SIZE)
+        fd = open(args.record_file, 'a')
 
-    print('Model Struture:', str(model))
-    fd.write(str(model) + '\n')
+        print('Args Config:', str(args))
+        fd.write(str(args) + '\n')
 
-    fd.close()
+        print('FLOPs: %.2fM, Params: %.2fM' % (n_flops / 1e6, n_params / 1e6))
+        fd.write('FLOPs: %.2fM, Params: %.2fM' % (n_flops / 1e6, n_params / 1e6) + '\n')
 
-    del (model)
+        print('Model Struture:', str(model))
+        fd.write(str(model) + '\n')
+
+        fd.close()
+
+        del (model)
 
     # model = MicroNet.get_MicroNet(args)
     model = MicroNet.get_MicroNet(args)
