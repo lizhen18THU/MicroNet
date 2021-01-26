@@ -70,7 +70,7 @@ def make_log_dir(args):
                 log_path = os.path.expanduser('~/lizhen_MicroNet_temper/MicroNet_log/') + str(args.dataset) \
                            + '_' + str(args.name) \
                            + '/' + 'no_' + str(args.no) + '/'
-        os.makedirs(log_path)
+            os.makedirs(log_path)
         return log_path
     else:
         log_path = args.train_url
