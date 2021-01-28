@@ -129,6 +129,7 @@ def main():
     if args.continue_train:
         print("Continue training!")
         fd.write("Continue training!" + "\n")
+        args.resume = "/home2/jhj/lizhen_MicroNet_temper/MicroNet_log/imagenet_basline/no_3/save_models/checkpoint.pth.tar"
     ### Calculate FLOPs & Param
     else:
         model = MicroNet.get_MicroNet(args)

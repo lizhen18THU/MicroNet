@@ -1,2 +1,0 @@
-# MicroNet
-MicroNet Recurrence

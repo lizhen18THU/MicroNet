@@ -2,9 +2,11 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="e046eaaa-ffde-417d-b444-56f6ed349101" name="Default Changelist" comment="for train">
+      <change beforePath="$PROJECT_DIR$/.idea/MicroNet.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/MicroNet.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test.py" beforeDir="false" afterPath="$PROJECT_DIR$/test.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -39,7 +41,7 @@
     <property name="node.js.path.for.package.tslint" value="project" />
     <property name="node.js.selected.package.eslint" value="(autodetect)" />
     <property name="node.js.selected.package.tslint" value="(autodetect)" />
-    <property name="settings.editor.selected.configurable" value="vcs.Git" />
+    <property name="settings.editor.selected.configurable" value="preferences.lookFeel" />
   </component>
   <component name="RunManager" selected="Python.test">
     <configuration name="main" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
@@ -161,7 +163,11 @@
       <workItem from="1611668443259" duration="1747000" />
       <workItem from="1611675887607" duration="1072000" />
       <workItem from="1611756862939" duration="67000" />
-      <workItem from="1611756930587" duration="258000" />
+      <workItem from="1611756930587" duration="570000" />
+      <workItem from="1611757512725" duration="504000" />
+      <workItem from="1611806034292" duration="278000" />
+      <workItem from="1611810509392" duration="68000" />
+      <workItem from="1611810587827" duration="119000" />
     </task>
     <task id="LOCAL-00001" summary="plus dropout">
       <created>1611130991088</created>
@@ -254,7 +260,14 @@
       <option name="project" value="LOCAL" />
       <updated>1611757100143</updated>
     </task>
-    <option name="localTasksCounter" value="14" />
+    <task id="LOCAL-00014" summary="for train">
+      <created>1611757210307</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1611757210307</updated>
+    </task>
+    <option name="localTasksCounter" value="15" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -270,19 +283,19 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="786" y="234" key="#com.intellij.ide.ui.customization.CustomizableActionsPanel.FindAvailableActionsDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1610810723275" />
-    <state x="448" y="0" key="CommitChangelistDialog2" timestamp="1611757123740">
+    <state x="448" y="0" width="859" height="823" key="CommitChangelistDialog2" timestamp="1611810705111">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state x="448" y="0" key="CommitChangelistDialog2/0.0.1536.824@0.0.1536.824" timestamp="1611757123740" />
+    <state x="448" y="0" width="859" height="823" key="CommitChangelistDialog2/0.0.1536.824@0.0.1536.824" timestamp="1611810705111" />
     <state x="560" y="112" key="CommitChangelistDialog2/0.0.1920.1040@0.0.1920.1040" timestamp="1611669596012" />
     <state x="92" y="92" width="1736" height="856" key="DiffContextDialog" timestamp="1611233050178">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="92" y="92" width="1736" height="856" key="DiffContextDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1611233050178" />
-    <state x="549" y="167" key="FileChooserDialogImpl" timestamp="1611756960355">
+    <state x="549" y="167" key="FileChooserDialogImpl" timestamp="1611757469259">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state x="549" y="167" key="FileChooserDialogImpl/0.0.1536.824@0.0.1536.824" timestamp="1611756960355" />
+    <state x="549" y="167" key="FileChooserDialogImpl/0.0.1536.824@0.0.1536.824" timestamp="1611757469259" />
     <state x="686" y="211" key="FileChooserDialogImpl/0.0.1920.1040@0.0.1920.1040" timestamp="1611242979200" />
     <state width="1876" height="277" key="GridCell.Tab.0.bottom" timestamp="1611676292522">
       <screen x="0" y="0" width="1920" height="1040" />
@@ -320,20 +333,25 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state width="1876" height="332" key="GridCell.Tab.1.right/0.0.1920.1040@0.0.1920.1040" timestamp="1610899133574" />
-    <state x="369" y="109" key="SettingsEditor" timestamp="1611757187718">
+    <state x="369" y="109" key="SettingsEditor" timestamp="1611757999167">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state x="369" y="109" key="SettingsEditor/0.0.1536.824@0.0.1536.824" timestamp="1611757187718" />
+    <state x="369" y="109" key="SettingsEditor/0.0.1536.824@0.0.1536.824" timestamp="1611757999167" />
     <state x="461" y="151" key="SettingsEditor/0.0.1920.1040@0.0.1920.1040" timestamp="1611066901970" />
-    <state x="561" y="298" key="com.intellij.ide.util.TipDialog" timestamp="1611675887661">
-      <screen x="0" y="0" width="1920" height="1040" />
+    <state x="449" y="236" key="com.intellij.ide.util.TipDialog" timestamp="1611810594981">
+      <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state x="449" y="236" key="com.intellij.ide.util.TipDialog/0.0.1536.824@0.0.1536.824" timestamp="1610596266762" />
+    <state x="449" y="236" key="com.intellij.ide.util.TipDialog/0.0.1536.824@0.0.1536.824" timestamp="1611810594981" />
     <state x="561" y="298" key="com.intellij.ide.util.TipDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1611675887661" />
-    <state x="752" y="436" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2" timestamp="1611220037562">
-      <screen x="0" y="0" width="1920" height="1040" />
+    <state x="602" y="345" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2" timestamp="1611757332576">
+      <screen x="0" y="0" width="1536" height="824" />
     </state>
+    <state x="602" y="345" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2/0.0.1536.824@0.0.1536.824" timestamp="1611757332576" />
     <state x="752" y="436" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2/0.0.1920.1040@0.0.1920.1040" timestamp="1611220037562" />
+    <state x="544" y="313" width="715" height="306" key="org.intellij.images.editor.actions.BackgroundImageDialog" timestamp="1611757998528">
+      <screen x="0" y="0" width="1536" height="824" />
+    </state>
+    <state x="544" y="313" width="715" height="306" key="org.intellij.images.editor.actions.BackgroundImageDialog/0.0.1536.824@0.0.1536.824" timestamp="1611757998528" />
     <state x="539" y="183" width="840" height="856" key="search.everywhere.popup" timestamp="1611676137138">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
