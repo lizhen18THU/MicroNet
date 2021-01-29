@@ -149,7 +149,7 @@ def main():
         criterion = CrossEntryLoss_onehot().cuda()
     else:
         criterion = nn.CrossEntropyLoss().cuda()
-    criterion_temper = nn.CrossEntropyLoss().cuda()  # forvalidation
+    criterion_temper = nn.CrossEntropyLoss().cuda()  # for validation
     optimizer = torch.optim.SGD(model.parameters(), args.lr,
                                 momentum=args.momentum,
                                 weight_decay=args.weight_decay,
