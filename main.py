@@ -11,12 +11,13 @@ import math
 import warnings
 import MicroNet
 
-from utils import measure_model, make_log_dir, CrossEntryLoss_onehot, mixup_data, label_Smothing
+from utils import measure_model, make_log_dir, CrossEntryLoss_onehot, mixup_data, label_Smothing, mini_imagenet
 
 parser = argparse.ArgumentParser(description='PyTorch Micro Convolutional Networks')
-parser.add_argument('--data_url', metavar='DIR', default='/home/imagenet',
+parser.add_argument('--data_url', metavar='DIR', default='~/lizhen_MicroNet_temper/data',
                     help='path to dataset')
-parser.add_argument('--dataset', metavar='DATASET', default='imagenet', choices=['cifar10', 'cifar100', 'imagenet'],
+parser.add_argument('--dataset', metavar='DATASET', default='mini-imagenet',
+                    choices=['cifar10', 'cifar100', 'mini-imagenet', 'imagenet'],
                     help='dataset')
 parser.add_argument('--pad_mode', metavar='DATA', default='constant',
                     choices=['constant', 'edge', 'reflect', 'symmetric'],
@@ -25,13 +26,13 @@ parser.add_argument('--model', default='M0_Net', type=str, metavar='M',
                     help='model to train the dataset')
 parser.add_argument('-j', '--workers', default=4, type=int, metavar='N',
                     help='number of data loading workers (default: 4)')
-parser.add_argument('--epochs', default=300, type=int, metavar='N',
+parser.add_argument('--epochs', default=200, type=int, metavar='N',
                     help='number of total epochs to run')
 parser.add_argument('--start_epoch', default=0, type=int, metavar='N',
                     help='manual epoch number (useful on restarts)')
-parser.add_argument('-b', '--batch-size', default=512, type=int,
+parser.add_argument('-b', '--batch-size', default=256, type=int,
                     metavar='N', help='mini-batch size (default: 512)')
-parser.add_argument('--lr', '--learning-rate', default=0.02, type=float,
+parser.add_argument('--lr', '--learning-rate', default=0.1, type=float,
                     metavar='LR', help='initial learning rate (default: 0.02)')
 parser.add_argument('--lr_type', default='cosine', type=str, metavar='T',
                     help='learning rate strategy (default: cosine)',
@@ -40,7 +41,7 @@ parser.add_argument('--momentum', default=0.9, type=float, metavar='M',
                     help='momentum (default: 0.9)')
 parser.add_argument('--weight_decay', '--wd', default=3e-5, type=float,
                     metavar='W', help='weight decay (default: 3e-5)', choices=['3e-5', '4e-5'])
-parser.add_argument('--print_freq', '-p', default=10, type=int,
+parser.add_argument('--print_freq', '-p', default=20, type=int,
                     metavar='N', help='print frequency (default: 10)')
 parser.add_argument('--pretrained', dest='pretrained', action='store_true',
                     help='use pre-trained model (default: false)')
@@ -48,10 +49,10 @@ parser.add_argument('--no_save_model', dest='no_save_model', action='store_true'
                     help='only save best model (default: false)')
 parser.add_argument('--manual_seed', default=0, type=int, metavar='N',
                     help='manual seed (default: 0)')
-parser.add_argument('--gpu', default="7", type=str,
+parser.add_argument('--gpu', default="0", type=str,
                     help='gpu available')
 
-parser.add_argument('--name', default='basline', type=str,
+parser.add_argument('--name', default='shufflenet', type=str,
                     help='name of experiment')
 parser.add_argument('--no', default='1', type=str,
                     help='index of the experiment (for recording convenience)')
@@ -74,22 +75,16 @@ parser.add_argument('--convert_from', default=None, type=str, metavar='PATH',
 parser.add_argument('--evaluate_from', default=None, type=str, metavar='PATH',
                     help='path to saved checkpoint (default: none)')
 
-# huawei cloud
+# aliyun cloud
 parser.add_argument('--train_on_cloud', dest='train_on_cloud', action='store_true', default=False,
-                    help='whether to run the code on huawei cloud')
-
-# multiscale
-parser.add_argument('--scale_out_ratio_1x1', type=str, metavar='CONV1X1 OUTPUT SCALE RATIO',
-                    help='1x1 convolution output scale ratio')
-parser.add_argument('--scale_ratio', default='0.5-0.5', type=str, metavar='CONV1X1 OUTPUT SCALE RATIO',
-                    help='1x1 convolution output scale ratio')
+                    help='whether to run the code on ali cloud')
 
 args = parser.parse_args()
 os.environ["CUDA_VISIBLE_DEVICES"] = args.gpu
 
 if args.dataset == 'cifar10':
     args.num_classes = 10
-elif args.dataset == 'cifar100':
+elif args.dataset in ['cifar100', 'mini-imagenet']:
     args.num_classes = 100
 else:
     args.num_classes = 1000
@@ -129,7 +124,7 @@ def main():
     if args.continue_train:
         print("Continue training!")
         fd.write("Continue training!" + "\n")
-        args.resume = "/home2/jhj/lizhen_MicroNet_temper/MicroNet_log/imagenet_basline/no_3/save_models/checkpoint.pth.tar"
+        args.resume = args.train_url + "save_models/checkpoint.pth.tar"
     ### Calculate FLOPs & Param
     else:
         model = MicroNet.get_MicroNet(args)
@@ -171,6 +166,9 @@ def main():
 
     cudnn.benchmark = True
 
+    if args.train_on_cloud:
+        args.data_url = "./data"
+
     ### Data loading 
     if args.dataset == "cifar10":
         normalize = transforms.Normalize(mean=[0.4914, 0.4824, 0.4467],
@@ -202,6 +200,21 @@ def main():
                                         transforms.ToTensor(),
                                         normalize,
                                     ]))
+    elif args.dataset == "mini-imagenet":
+        normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                                         std=[0.229, 0.224, 0.225])
+        train_set = mini_imagenet(args.data_url, "split_train.csv", transforms.Compose([
+            transforms.RandomSizedCrop(224),
+            transforms.RandomHorizontalFlip(),
+            transforms.ToTensor(),
+            normalize,
+        ]))
+        val_set = mini_imagenet(args.data_url, "split_val.csv", transforms.Compose([
+            transforms.Scale(256),
+            transforms.CenterCrop(224),
+            transforms.ToTensor(),
+            normalize,
+        ]))
     else:
         traindir = os.path.join(args.data_url, 'train')
         valdir = os.path.join(args.data_url, 'val')
@@ -266,8 +279,8 @@ def main():
                                           (epoch, val_acc1, val_acc5, tr_acc1, tr_acc5, val_loss, tr_loss, lr))
 
         epoch_time.update(time.time() - start_time, 1)
-        string = 'Duration: %4f H, Left Time: %4f H' % \
-                 (epoch_time.sum / 3600, epoch_time.avg * (args.epochs - epoch - 1) / 3600)
+        string = 'Avg_time: %4f H, Duration: %4f H, Left Time: %4f H' % \
+                 (epoch_time.avg / 3600, epoch_time.sum / 3600, epoch_time.avg * (args.epochs - epoch - 1) / 3600)
         print(string)
         fd = open(args.record_file, 'a')
         fd.write(string + '\n')

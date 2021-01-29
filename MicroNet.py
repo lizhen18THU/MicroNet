@@ -8,7 +8,7 @@ import torch.nn.functional as F
 # 关于BN和dropout加不加，怎么加，还有
 
 class MicroNet_M0(nn.Module):
-    def __init__(self, droprate, droprate_fc, classNum=1000):
+    def __init__(self, droprate, droprate_fc, classNum):
         super(MicroNet_M0, self).__init__()
 
         self.stem = stemLayers(kernelSize=3, inchannel=3, outchannel=6, midchannel=3, G=(1, 3), stride=2,
@@ -51,7 +51,7 @@ class MicroNet_M0(nn.Module):
 
 
 class MicroNet_M1(nn.Module):
-    def __init__(self, droprate, droprate_fc, classNum=1000):
+    def __init__(self, droprate, droprate_fc, classNum):
         super(MicroNet_M1, self).__init__()
 
         self.stem = stemLayers(kernelSize=3, inchannel=3, outchannel=8, midchannel=4, G=(1, 4), stride=2,
@@ -101,7 +101,7 @@ class MicroNet_M1(nn.Module):
 
 
 class MicroNet_M2(nn.Module):
-    def __init__(self, droprate, droprate_fc, classNum=1000):
+    def __init__(self, droprate, droprate_fc, classNum):
         super(MicroNet_M2, self).__init__()
 
         self.stem = stemLayers(kernelSize=3, inchannel=3, outchannel=12, midchannel=4, G=(1, 4), stride=2,
@@ -153,7 +153,7 @@ class MicroNet_M2(nn.Module):
 
 
 class MicroNet_M3(nn.Module):
-    def __init__(self, droprate, droprate_fc, classNum=1000):
+    def __init__(self, droprate, droprate_fc, classNum):
         super(MicroNet_M3, self).__init__()
 
         self.stem = stemLayers(kernelSize=3, inchannel=3, outchannel=16, midchannel=4, G=(1, 4), stride=2,
@@ -204,33 +204,17 @@ class MicroNet_M3(nn.Module):
         return x
 
 
-def M0_Net(droprate=0, droprate_fc=0.05):
-    return MicroNet_M0(droprate, droprate_fc)
-
-
-def M1_Net(droprate=0, droprate_fc=0.05):
-    return MicroNet_M1(droprate, droprate_fc)
-
-
-def M2_Net(droprate=0, droprate_fc=0.1):
-    return MicroNet_M2(droprate, droprate_fc)
-
-
-def M3_Net(droprate=0, droprate_fc=0.1):
-    return MicroNet_M3(droprate, droprate_fc)
-
-
 def get_MicroNet(args):
     if args.model == "M0_Net":
-        model = M0_Net(args.droprate,
-                       args.droprate_fc) if args.droprate > 0 or args.droprate_fc > 0 else M0_Net()
+        model = MicroNet_M0(args.droprate, args.droprate_fc, args.num_classes) \
+            if args.droprate > 0 or args.droprate_fc > 0 else MicroNet_M0(0, 0.05, args.num_classes)
     elif args.model == "M1_Net":
-        model = M1_Net(args.droprate,
-                       args.droprate_fc) if args.droprate > 0 or args.droprate_fc > 0 else M1_Net()
+        model = MicroNet_M1(args.droprate, args.droprate_fc, args.num_classes) \
+            if args.droprate > 0 or args.droprate_fc > 0 else MicroNet_M1(0, 0.05, args.num_classes)
     elif args.model == "M2_Net":
-        model = M2_Net(args.droprate,
-                       args.droprate_fc) if args.droprate > 0 or args.droprate_fc > 0 else M2_Net()
+        model = MicroNet_M2(args.droprate, args.droprate_fc, args.num_classes) \
+            if args.droprate > 0 or args.droprate_fc > 0 else MicroNet_M2(0, 0.05, args.num_classes)
     else:
-        model = M3_Net(args.droprate,
-                       args.droprate_fc) if args.droprate > 0 or args.droprate_fc > 0 else M3_Net()
+        model = MicroNet_M3(args.droprate, args.droprate_fc, args.num_classes) \
+            if args.droprate > 0 or args.droprate_fc > 0 else MicroNet_M3(0, 0.05, args.num_classes)
     return model

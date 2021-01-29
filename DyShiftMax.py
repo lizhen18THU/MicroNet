@@ -15,9 +15,9 @@ class DyShiftMax(nn.Module):
         self.fc2 = nn.Linear(channels // reduction, J * K * channels)
         self.sigmoid = nn.Sigmoid()
 
-        # 不更新的初始参数
-        self.register_buffer("lambdas", torch.Tensor([1.0] * J).float())  # J个
-        self.register_buffer("alphas", torch.Tensor([1.0] + [0.0] * (K - 1)).float())  # K个
+        # 不更新的初始参数  using dynamic ReLU
+        # self.register_buffer("lambdas", torch.Tensor([1.0] * J).float())  # J个
+        # self.register_buffer("alphas", torch.Tensor([1.0] + [0.0] * (K - 1)).float())  # K个
 
     # 获得theta(x)参数
     def get_relu_coefs(self, x):
@@ -32,10 +32,11 @@ class DyShiftMax(nn.Module):
     def forward(self, x):
         assert self.channels == x.shape[1]
 
-        theta = self.get_relu_coefs(x)
+        relu_coefs = self.get_relu_coefs(x).view(-1, self.channels, self.J, self.K)
 
-        relu_coefs = theta.view(-1, self.channels, self.J, self.K).permute(0, 1, 3, 2) * self.lambdas
-        relu_coefs = relu_coefs.permute(0, 1, 3, 2) + self.alphas
+        # B*C*J*K   using dynamic ReLU
+        # relu_coefs = theta.view(-1, self.channels, self.J, self.K).permute(0, 1, 3, 2) * self.lambdas
+        # relu_coefs = relu_coefs.permute(0, 1, 3, 2) + self.alphas
 
         # B*C*H*W->H*W*B*C*1
         x_temp = x.permute(2, 3, 0, 1).unsqueeze(-1) * relu_coefs[:, :, 0, :]
