@@ -98,18 +98,24 @@
 # if __name__ == '__main__':
 #     main()
 #
-import torch
+import os
+import zipfile
+import shutil
 
-a = torch.ones(3, 4, 5)
-print(a)
-b = torch.arange(4)
-print(b)
-a = (a.permute(0, 2, 1) * b).permute(0, 2, 1)
-print(a)
-temper = b.expand(3, -1)
-print(temper)
-temper = ((temper.permute(1, 0) + torch.arange(3)) % 4).permute(1, 0)
-print(temper)
-temper = temper.expand(5, -1, -1).permute(1, 2, 0)
-a = torch.gather(a, 1, temper)
-print(a)
+filepath = "/home2/jhj/lizhen_MicroNet_temper/data/0/images"
+# zip_file = zipfile.ZipFile(filepath) #获取压缩文件
+# print(filepath)
+newfilepath = "/home2/jhj/lizhen_MicroNet_temper/data"
+shutil.move(filepath, newfilepath)
+# print(newfilepath)
+# if os.path.isdir(newfilepath): # 根据获取的压缩文件的文件名建立相应的文件夹
+#     pass
+# else:
+#     os.mkdir(newfilepath)
+# for name in zip_file.namelist():# 解压文件
+#     zip_file.extract(name,newfilepath)
+# zip_file.close()
+# Conf = os.path.join(newfilepath,'conf')
+# if os.path.exists(Conf):#如存在配置文件，则删除（需要删则删，不要的话不删）
+#     shutil.rmtree(Conf)
+# print("解压{0}成功".format(filepath))

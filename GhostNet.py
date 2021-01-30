@@ -247,11 +247,11 @@ def ghostnet(**kwargs):
 
 
 def get_GhostNet(args):
-    if args.model.statswith("G0"):
+    if args.model.startswith("G0"):
         return ghostnet(num_classes=args.num_classes, width=0.1, droprate=0.05)
-    elif args.model.statswith("G1"):
+    elif args.model.startswith("G1"):
         return ghostnet(num_classes=args.num_classes, width=0.25, droprate=0.05)
-    elif args.model.statswith("G2"):
+    elif args.model.startswith("G2"):
         return ghostnet(num_classes=args.num_classes, width=0.35, droprate=0.1)
     else:
         return ghostnet(num_classes=args.num_classes, width=0.55, droprate=0.1)
