@@ -38,12 +38,22 @@ class DyShiftMax(nn.Module):
         # relu_coefs = theta.view(-1, self.channels, self.J, self.K).permute(0, 1, 3, 2) * self.lambdas
         # relu_coefs = relu_coefs.permute(0, 1, 3, 2) + self.alphas
 
+        # # 不使用循环，但是感觉反而产生更大的运算量，所以在J=2的情况下不使用
+        # CG = self.channels // self.groups
+        # x_temp = x.expand(self.J, -1, -1, -1, -1)  # J*B*C*H*W
+        # index = ((torch.arange(self.channels).expand(self.J, -1).permute(1, 0) + torch.arange(
+        #     self.J) * CG) % self.channels).permute((1, 0)).expand(
+        #     x.shape[0], x.shape[2], x.shape[3], -1, -1).permute(3, 0, 4, 1, 2)
+        # x_temp = (torch.gather(x_temp, dim=2, index=index).permute(3, 4, 1, 2, 0).unsqueeze(dim=-1) * relu_coefs).sum(
+        #     dim=-2)
+
         # B*C*H*W->H*W*B*C*1
         x_temp = x.permute(2, 3, 0, 1).unsqueeze(-1) * relu_coefs[:, :, 0, :]
-        for j in range(1, self.J):
+        for j in range(1, self.J):  # J=2
             x_temp = x_temp + torch.cat((x[:, int(self.channels / self.groups * j):self.channels, :, :],
                                          x[:, 0:int(self.channels / self.groups * j), :, :]),
                                         dim=1).permute(2, 3, 0, 1).unsqueeze(-1) * relu_coefs[:, :, j, :]
+
         output = torch.max(x_temp, dim=-1)[0].permute(2, 3, 0, 1)
 
         return output.contiguous()

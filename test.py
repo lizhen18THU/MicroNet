@@ -97,14 +97,19 @@
 #
 # if __name__ == '__main__':
 #     main()
-
+#
 import torch
-from torchvision import models
-import MicroNet
-from thop import profile
 
-# net = MicroNet.MicroNet_M1(0, 0.05, 1000)
-net = MicroNet.MicroNet_M3(0, 0.1, 1000)
-inputs = torch.randn(1, 3, 224, 224)
-flops, params = profile(net, (inputs,))
-print('flops: ', flops / 1e6, ' M  ', 'params: ', params / 1e6, 'M')
+a = torch.ones(3, 4, 5)
+print(a)
+b = torch.arange(4)
+print(b)
+a = (a.permute(0, 2, 1) * b).permute(0, 2, 1)
+print(a)
+temper = b.expand(3, -1)
+print(temper)
+temper = ((temper.permute(1, 0) + torch.arange(3)) % 4).permute(1, 0)
+print(temper)
+temper = temper.expand(5, -1, -1).permute(1, 2, 0)
+a = torch.gather(a, 1, temper)
+print(a)
