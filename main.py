@@ -10,6 +10,7 @@ import time
 import math
 import warnings
 import MicroNet
+import GhostNet
 
 from utils import measure_model, make_log_dir, CrossEntryLoss_onehot, mixup_data, label_Smothing, mini_imagenet
 
@@ -22,7 +23,7 @@ parser.add_argument('--dataset', metavar='DATASET', default='mini-imagenet',
 parser.add_argument('--pad_mode', metavar='DATA', default='constant',
                     choices=['constant', 'edge', 'reflect', 'symmetric'],
                     help='dataset')
-parser.add_argument('--model', default='M0_Net', type=str, metavar='M',
+parser.add_argument('--model', default='G0_Net', type=str, metavar='M',
                     help='model to train the dataset')
 parser.add_argument('-j', '--workers', default=4, type=int, metavar='N',
                     help='number of data loading workers (default: 4)')
@@ -42,7 +43,7 @@ parser.add_argument('--momentum', default=0.9, type=float, metavar='M',
 parser.add_argument('--weight_decay', '--wd', default=3e-5, type=float,
                     metavar='W', help='weight decay (default: 3e-5)', choices=['3e-5', '4e-5'])
 parser.add_argument('--print_freq', '-p', default=20, type=int,
-                    metavar='N', help='print frequency (default: 10)')
+                    metavar='N', help='print frequency (default: 20)')
 parser.add_argument('--pretrained', dest='pretrained', action='store_true',
                     help='use pre-trained model (default: false)')
 parser.add_argument('--no_save_model', dest='no_save_model', action='store_true',
@@ -52,7 +53,7 @@ parser.add_argument('--manual_seed', default=0, type=int, metavar='N',
 parser.add_argument('--gpu', default="0", type=str,
                     help='gpu available')
 
-parser.add_argument('--name', default='shufflenet', type=str,
+parser.add_argument('--name', default='ghostnet', type=str,
                     help='name of experiment')
 parser.add_argument('--no', default='1', type=str,
                     help='index of the experiment (for recording convenience)')
@@ -127,7 +128,10 @@ def main():
         args.resume = args.train_url + "save_models/checkpoint.pth.tar"
     ### Calculate FLOPs & Param
     else:
-        model = MicroNet.get_MicroNet(args)
+        if args.model.startswith("G"):
+            model = GhostNet.get_GhostNet(args)
+        else:
+            model = MicroNet.get_MicroNet(args)
 
         n_flops, n_params = measure_model(model, IMAGE_SIZE, IMAGE_SIZE)
 
@@ -141,7 +145,10 @@ def main():
     fd.close()
 
     # model = MicroNet.get_MicroNet(args)
-    model = MicroNet.get_MicroNet(args)
+    if args.model.startswith("G"):
+        model = GhostNet.get_GhostNet(args)
+    else:
+        model = MicroNet.get_MicroNet(args)
     model.cuda()
 
     ### Define loss function (criterion) and optimizer
@@ -294,6 +301,7 @@ def main():
     # print('Converting End!')
     print('Model Struture:', str(model))
     validate(val_loader, model, criterion_temper)
+    model.cpu()
     n_flops, n_params = measure_model(model, IMAGE_SIZE, IMAGE_SIZE)
     print('FLOPs: %.2fM, Params: %.2fM' % (n_flops / 1e6, n_params / 1e6))
 

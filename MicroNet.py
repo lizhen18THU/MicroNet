@@ -223,8 +223,8 @@ def get_MicroNet(args):
 if __name__ == '__main__':
     from thop import profile
 
-    net = MicroNet_M0(0, 0.05, 100)
-    # net = MicroNet_M3(0, 0.1, 1000)
+    # net = MicroNet_M1(0, 0.05, 100)
+    net = MicroNet_M3(0, 0.1, 100)
     inputs = torch.randn(1, 3, 224, 224)
     flops, params = profile(net, (inputs,))
     print('flops: ', flops / 1e6, ' M  ', 'params: ', params / 1e6, 'M')

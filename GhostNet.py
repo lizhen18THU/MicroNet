@@ -246,11 +246,22 @@ def ghostnet(**kwargs):
     return GhostNet(cfgs, **kwargs)
 
 
+def get_GhostNet(args):
+    if args.model.statswith("G0"):
+        return ghostnet(num_classes=args.num_classes, width=0.1, droprate=0.05)
+    elif args.model.statswith("G1"):
+        return ghostnet(num_classes=args.num_classes, width=0.25, droprate=0.05)
+    elif args.model.statswith("G2"):
+        return ghostnet(num_classes=args.num_classes, width=0.35, droprate=0.1)
+    else:
+        return ghostnet(num_classes=args.num_classes, width=0.55, droprate=0.1)
+
+
 if __name__ == '__main__':
     from thop import profile
 
     # net = MicroNet.MicroNet_M1(0, 0.05, 1000)
-    net = ghostnet(num_classes=100,width=0.1)
+    net = ghostnet(num_classes=100, width=0.55)
     inputs = torch.randn(1, 3, 224, 224)
     flops, params = profile(net, (inputs,))
     print('flops: ', flops / 1e6, ' M  ', 'params: ', params / 1e6, 'M')
