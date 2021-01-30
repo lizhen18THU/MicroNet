@@ -248,13 +248,13 @@ def ghostnet(**kwargs):
 
 def get_GhostNet(args):
     if args.model.startswith("G0"):
-        return ghostnet(num_classes=args.num_classes, width=0.1, droprate=0.05)
+        return ghostnet(num_classes=args.num_classes, width=0.1, dropout=0.05)
     elif args.model.startswith("G1"):
-        return ghostnet(num_classes=args.num_classes, width=0.25, droprate=0.05)
+        return ghostnet(num_classes=args.num_classes, width=0.25, dropout=0.05)
     elif args.model.startswith("G2"):
-        return ghostnet(num_classes=args.num_classes, width=0.35, droprate=0.1)
+        return ghostnet(num_classes=args.num_classes, width=0.35, dropout=0.1)
     else:
-        return ghostnet(num_classes=args.num_classes, width=0.55, droprate=0.1)
+        return ghostnet(num_classes=args.num_classes, width=0.55, dropout=0.1)
 
 
 if __name__ == '__main__':

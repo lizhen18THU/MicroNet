@@ -19,8 +19,8 @@ class mini_imagenet(Dataset):
         images_dir = os.path.join(root_dir, "images")
         csv_dir = os.path.join(root_dir, csv_name)
         csv_data = pd.read_csv(csv_dir)
-        self.image_paths = [os.path.join(images_dir, name) for name in csv_data[:, "filename"].values]
-        self.image_labels = [label for label in csv_data[:, "label"].values]
+        self.image_paths = [os.path.join(images_dir, name) for name in csv_data["filename"].values]
+        self.image_labels = [label for label in csv_data["label"].values]
         self.transform = transform
 
     def __len__(self):
