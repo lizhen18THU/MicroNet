@@ -348,12 +348,16 @@ def train(train_loader, model, criterion, optimizer, epoch, args):
         ### Compute output
         output = model(input)
         loss = criterion(output, target)
+        losses.update(loss.item(), input.size(0))
 
         ### Measure accuracy and record loss
-        acc1, acc5 = accuracy(output.data, target, topk=(1, 5))
-        losses.update(loss.item(), input.size(0))
-        top1.update(acc1.item(), input.size(0))
-        top5.update(acc5.item(), input.size(0))
+        if not args.LSR_Mixup:
+            acc1, acc5 = accuracy(output.data, target, topk=(1, 5))
+            top1.update(acc1.item(), input.size(0))
+            top5.update(acc5.item(), input.size(0))
+        else:
+            top1.update(0)
+            top5.update(0)
 
         ### Compute gradient and do SGD step
         optimizer.zero_grad()
