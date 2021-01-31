@@ -71,13 +71,13 @@ class MicroBlockA(nn.Module):
         self.facdep_conv2 = nn.Conv2d(inchannel * r1, inchannel * r1 * r2, (1, kernelSize), stride=(1, stride),
                                       padding=(0, (kernelSize - 1) // 2), groups=inchannel * r1, bias=False)
         self.bn2 = nn.BatchNorm2d(outchannel)
-        self.dysmax1 = DyshiftMax.DyShiftMax(outchannel, inchannel, min(midchannel // 4, 4))
+        self.dysmax1 = DyshiftMax.DyShiftMax(outchannel, inchannel, min(outchannel // 4, 16))
 
         # macro-factorized pointwise conv
         self.facpoint_conv = nn.Conv2d(outchannel, midchannel, kernel_size=1, groups=G[0], bias=False)
         self.point_chanShuffle = channelShuffle(G[0])
         self.bn3 = nn.BatchNorm2d(midchannel)
-        self.dysmax2 = DyshiftMax.DyShiftMax(midchannel, G[0], min(midchannel // 4, 4))
+        self.dysmax2 = DyshiftMax.DyShiftMax(midchannel, G[0], min(midchannel // 4, 16))
         self.droprate = droprate
 
     def forward(self, x):
@@ -105,16 +105,16 @@ class MicroBlockB(nn.Module):
         self.facdep_conv2 = nn.Conv2d(inchannel * r1, inchannel * r1 * r2, (1, kernelSize), stride=(1, stride),
                                       padding=(0, (kernelSize - 1) // 2), groups=inchannel * r1, bias=False)
         self.bn2 = nn.BatchNorm2d(outchannel)
-        self.dysmax1 = DyshiftMax.DyShiftMax(outchannel, inchannel, min(midchannel // 4, 4))
+        self.dysmax1 = DyshiftMax.DyShiftMax(outchannel, inchannel, min(outchannel // 4, 16))
 
         # macro-factorized pointwise conv
         self.facpoint_conv1 = nn.Conv2d(outchannel, midchannel, kernel_size=1, groups=G[0], bias=False)
         self.point_chanShuffle = channelShuffle(G[0])
         self.bn3 = nn.BatchNorm2d(midchannel)
-        self.dysmax2 = DyshiftMax.DyShiftMax(midchannel, G[0], min(midchannel // 4, 4))
+        self.dysmax2 = DyshiftMax.DyShiftMax(midchannel, G[0], min(midchannel // 4, 16))
         self.facpoint_conv2 = nn.Conv2d(midchannel, outchannel, kernel_size=1, groups=G[1], bias=False)
         self.bn4 = nn.BatchNorm2d(outchannel)
-        self.dysmax3 = DyshiftMax.DyShiftMax(outchannel, G[1], min(midchannel // 4, 4))
+        self.dysmax3 = DyshiftMax.DyShiftMax(outchannel, G[1], min(outchannel // 4, 16))
         self.droprate = droprate
 
     def forward(self, x):
@@ -143,17 +143,17 @@ class MicroBlockC(nn.Module):
         self.facdep_conv2 = nn.Conv2d(inchannel, inchannel, (1, kernelSize), stride=(1, stride),
                                       padding=(0, (kernelSize - 1) // 2), groups=inchannel, bias=False)
         self.bn2 = nn.BatchNorm2d(inchannel)
-        self.dysmax1 = DyshiftMax.DyShiftMax(inchannel, inchannel, min(inchannel // 4, 4))
+        self.dysmax1 = DyshiftMax.DyShiftMax(inchannel, inchannel, min(inchannel // 4, 16))
 
         # macro-factorized pointwise conv
         assert int(inchannel / G[0]) == inchannel / G[0]
         self.facpoint_conv1 = nn.Conv2d(inchannel, midchannel, kernel_size=1, groups=G[0], bias=False)
         self.point_chanShuffle = channelShuffle(G[0])
         self.bn3 = nn.BatchNorm2d(midchannel)
-        self.dysmax2 = DyshiftMax.DyShiftMax(midchannel, G[0], min(midchannel // 4, 4))
+        self.dysmax2 = DyshiftMax.DyShiftMax(midchannel, G[0], min(midchannel // 4, 16))
         self.facpoint_conv2 = nn.Conv2d(midchannel, outchannel, kernel_size=1, groups=G[1], bias=False)
         self.bn4 = nn.BatchNorm2d(outchannel)
-        self.dysmax3 = DyshiftMax.DyShiftMax(outchannel, G[1], min(midchannel // 4, 4))
+        self.dysmax3 = DyshiftMax.DyShiftMax(outchannel, G[1], min(outchannel // 4, 16))
         self.droprate = droprate
 
     def forward(self, x):
@@ -167,7 +167,7 @@ class MicroBlockC(nn.Module):
         out = self.bn4(self.facpoint_conv2(out))
         out = self.dysmax3(out)
 
-        if self.inchannel == self.outchannel:
+        if self.inchannel == self.outchannel and out.shape[2] == x.shape[2]:
             out += x
 
         return out

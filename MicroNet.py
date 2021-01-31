@@ -5,8 +5,6 @@ import math
 import torch.nn.functional as F
 
 
-# 关于BN和dropout加不加，怎么加，还有
-
 class MicroNet_M0(nn.Module):
     def __init__(self, droprate, droprate_fc, classNum):
         super(MicroNet_M0, self).__init__()
@@ -19,7 +17,7 @@ class MicroNet_M0(nn.Module):
                                     MicroBlockC(5, 96, 192, 32, (4, 8), 1, droprate))
         self.stage4 = nn.Sequential(MicroBlockC(5, 192, 384, 64, (8, 8), 2, droprate),
                                     MicroBlockC(3, 384, 576, 96, (8, 12), 1, droprate))
-        self.avg_pooling = nn.AdaptiveAvgPool2d(1)
+        self.avg_pooling = nn.AvgPool2d(7)
         self.nchannels = 576
         self.fc1 = nn.Linear(576, 576 // 4)
         # 只在全连接层加上dropout
@@ -63,7 +61,7 @@ class MicroNet_M1(nn.Module):
                                     MicroBlockC(5, 192, 384, 64, (8, 8), 1, droprate))
         self.stage4 = nn.Sequential(MicroBlockC(5, 384, 576, 96, (8, 12), 2, droprate),
                                     MicroBlockC(3, 576, 768, 128, (8, 16), 1, droprate))
-        self.avg_pooling = nn.AdaptiveAvgPool2d(1)
+        self.avg_pooling = nn.AvgPool2d(7)
         self.nchannels = 768
         self.fc1 = nn.Linear(768, 768 // 4)
         self.droprate_fc = droprate_fc
@@ -115,7 +113,7 @@ class MicroNet_M2(nn.Module):
         self.stage4 = nn.Sequential(MicroBlockC(5, 480, 720, 120, (10, 12), 2, droprate),
                                     MicroBlockC(3, 720, 720, 120, (10, 12), 1, droprate),
                                     MicroBlockC(3, 720, 864, 144, (12, 12), 1, droprate))
-        self.avg_pooling = nn.AdaptiveAvgPool2d(1)
+        self.avg_pooling = nn.AvgPool2d(7)
         self.nchannels = 864
         self.fc1 = nn.Linear(864, 864 // 4)
         self.droprate_fc = droprate_fc
@@ -167,7 +165,7 @@ class MicroNet_M3(nn.Module):
         self.stage4 = nn.Sequential(self._make_Layers(2, 576, 2, 5, 768, 192, (12, 16), droprate),
                                     MicroBlockC(5, 768, 768, 192, (12, 16), 1, droprate),
                                     MicroBlockC(3, 768, 1024, 256, (16, 16), 1, droprate))
-        self.avg_pooling = nn.AdaptiveAvgPool2d(1)
+        self.avg_pooling = nn.AvgPool2d(7)
         self.nchannels = 1024
         self.fc1 = nn.Linear(1024, 1024 // 4)
         self.droprate_fc = droprate_fc
@@ -213,18 +211,19 @@ def get_MicroNet(args):
             if args.droprate > 0 or args.droprate_fc > 0 else MicroNet_M1(0, 0.05, args.num_classes)
     elif args.model == "M2_Net":
         model = MicroNet_M2(args.droprate, args.droprate_fc, args.num_classes) \
-            if args.droprate > 0 or args.droprate_fc > 0 else MicroNet_M2(0, 0.05, args.num_classes)
+            if args.droprate > 0 or args.droprate_fc > 0 else MicroNet_M2(0, 0.1, args.num_classes)
     else:
         model = MicroNet_M3(args.droprate, args.droprate_fc, args.num_classes) \
-            if args.droprate > 0 or args.droprate_fc > 0 else MicroNet_M3(0, 0.05, args.num_classes)
+            if args.droprate > 0 or args.droprate_fc > 0 else MicroNet_M3(0, 0.1, args.num_classes)
     return model
 
 
 if __name__ == '__main__':
     from thop import profile
+    import torchstat
 
     # net = MicroNet_M1(0, 0.05, 100)
-    net = MicroNet_M3(0, 0.1, 100)
+    net = MicroNet_M2(0, 0.1, 1000)
     inputs = torch.randn(1, 3, 224, 224)
     flops, params = profile(net, (inputs,))
     print('flops: ', flops / 1e6, ' M  ', 'params: ', params / 1e6, 'M')
