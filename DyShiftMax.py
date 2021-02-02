@@ -15,9 +15,9 @@ class DyShiftMax(nn.Module):
         self.fc2 = nn.Linear(channels // reduction, J * K * channels)
         self.sigmoid = nn.Sigmoid()
 
-        # 不更新的初始参数  using dynamic ReLU
-        # self.register_buffer("lambdas", torch.Tensor([1.0] * J).float())  # J个
-        # self.register_buffer("alphas", torch.Tensor([1.0] + [0.0] * (K - 1)).float())  # K个
+        # 固定的初始参数，不会随着训练而更新，参考论文二作的文章dynamic ReLU里的做法
+        self.register_buffer("lambdas", torch.Tensor([0.5] * J).float())  # J个
+        self.register_buffer("alphas", torch.Tensor([1.0] + [0.0] * (K - 1)).float())  # K个
 
     # 获得theta(x)参数
     def get_relu_coefs(self, x):
@@ -35,10 +35,10 @@ class DyShiftMax(nn.Module):
         relu_coefs = self.get_relu_coefs(x).view(-1, self.channels, self.J, self.K)
 
         # B*C*J*K   using dynamic ReLU
-        # relu_coefs = theta.view(-1, self.channels, self.J, self.K).permute(0, 1, 3, 2) * self.lambdas
-        # relu_coefs = relu_coefs.permute(0, 1, 3, 2) + self.alphas
+        relu_coefs = relu_coefs.view(-1, self.channels, self.J, self.K).permute(0, 1, 3, 2) * self.lambdas
+        relu_coefs = relu_coefs.permute(0, 1, 3, 2) + self.alphas
 
-        # # 不使用循环，但是感觉反而产生更大的运算量，所以在J=2的情况下不使用
+        # # 不使用循环完成，但是感觉反而产生更大的运算量，所以在J=2的情况下不使用，直接使用循环
         # CG = self.channels // self.groups
         # output = x.expand(self.J, -1, -1, -1, -1)  # J*B*C*H*W
         # index = ((torch.arange(self.channels).expand(self.J, -1).permute(1, 0) + torch.arange(

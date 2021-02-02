@@ -23,7 +23,7 @@ parser.add_argument('--dataset', metavar='DATASET', default='mini-imagenet',
 parser.add_argument('--pad_mode', metavar='DATA', default='constant',
                     choices=['constant', 'edge', 'reflect', 'symmetric'],
                     help='dataset')
-parser.add_argument('--model', default='G0_Net', type=str, metavar='M',
+parser.add_argument('--model', default='M0_Net', type=str, metavar='M',
                     help='model to train the dataset')
 parser.add_argument('-j', '--workers', default=4, type=int, metavar='N',
                     help='number of data loading workers (default: 4)')
@@ -53,7 +53,7 @@ parser.add_argument('--manual_seed', default=0, type=int, metavar='N',
 parser.add_argument('--gpu', default="0", type=str,
                     help='gpu available')
 
-parser.add_argument('--name', default='ghostnet', type=str,
+parser.add_argument('--name', default='micronet', type=str,
                     help='name of experiment')
 parser.add_argument('--no', default='1', type=str,
                     help='index of the experiment (for recording convenience)')

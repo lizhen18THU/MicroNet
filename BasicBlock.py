@@ -14,19 +14,20 @@ class stemLayers(nn.Module):
         self.conv1 = nn.Conv2d(inchannel, midchannel, (kernelSize, 1), stride=(stride, 1),
                                padding=((kernelSize - 1) // 2, 0), groups=G[0], bias=False)
         self.bn1 = nn.BatchNorm2d(midchannel)
+        self.relu1 = nn.ReLU(inplace=True)
         # 1*3conv
         self.conv2 = nn.Conv2d(midchannel, outchannel, (1, kernelSize), stride=(1, stride),
                                padding=(0, (kernelSize - 1) // 2), groups=G[1], bias=False)
         self.bn2 = nn.BatchNorm2d(outchannel)
-        self.relu = nn.ReLU(inplace=True)
+        self.relu2 = nn.ReLU(inplace=True)
         self.droprate = droprate
 
     def forward(self, x):
-        x = self.bn1(self.conv1(x))
+        x = self.relu1(self.bn1(self.conv1(x)))
         if self.droprate > 0:
             x = F.dropout(x, p=self.droprate, training=self.training)
         x = self.bn2(self.conv2(x))
-        x = self.relu(x)
+        x = self.relu2(x)
         return x
 
 
@@ -68,6 +69,7 @@ class MicroBlockA(nn.Module):
         self.facdep_conv1 = nn.Conv2d(inchannel, inchannel * r1, (kernelSize, 1), stride=(stride, 1),
                                       padding=((kernelSize - 1) // 2, 0), groups=inchannel, bias=False)
         self.bn1 = nn.BatchNorm2d(inchannel * r1)
+        self.relu1 = nn.ReLU(inplace=True)
         self.facdep_conv2 = nn.Conv2d(inchannel * r1, inchannel * r1 * r2, (1, kernelSize), stride=(1, stride),
                                       padding=(0, (kernelSize - 1) // 2), groups=inchannel * r1, bias=False)
         self.bn2 = nn.BatchNorm2d(outchannel)
@@ -81,7 +83,7 @@ class MicroBlockA(nn.Module):
         self.droprate = droprate
 
     def forward(self, x):
-        x = self.bn1(self.facdep_conv1(x))
+        x = self.relu1(self.bn1(self.facdep_conv1(x)))
         x = self.bn2(self.facdep_conv2(x))
         x = self.dysmax1(x)
         if self.droprate > 0:
@@ -102,6 +104,7 @@ class MicroBlockB(nn.Module):
         self.facdep_conv1 = nn.Conv2d(inchannel, inchannel * r1, (kernelSize, 1), stride=(stride, 1),
                                       padding=((kernelSize - 1) // 2, 0), groups=inchannel, bias=False)
         self.bn1 = nn.BatchNorm2d(inchannel * r1)
+        self.relu1 = nn.ReLU(inplace=True)
         self.facdep_conv2 = nn.Conv2d(inchannel * r1, inchannel * r1 * r2, (1, kernelSize), stride=(1, stride),
                                       padding=(0, (kernelSize - 1) // 2), groups=inchannel * r1, bias=False)
         self.bn2 = nn.BatchNorm2d(outchannel)
@@ -118,7 +121,7 @@ class MicroBlockB(nn.Module):
         self.droprate = droprate
 
     def forward(self, x):
-        x = self.bn1(self.facdep_conv1(x))
+        x = self.relu1(self.bn1(self.facdep_conv1(x)))
         x = self.bn2(self.facdep_conv2(x))
         x = self.dysmax1(x)
         if self.droprate > 0:
@@ -140,6 +143,7 @@ class MicroBlockC(nn.Module):
         self.facdep_conv1 = nn.Conv2d(inchannel, inchannel, (kernelSize, 1), stride=(stride, 1),
                                       padding=((kernelSize - 1) // 2, 0), groups=inchannel, bias=False)
         self.bn1 = nn.BatchNorm2d(inchannel)
+        self.relu1 = nn.ReLU(inplace=True)
         self.facdep_conv2 = nn.Conv2d(inchannel, inchannel, (1, kernelSize), stride=(1, stride),
                                       padding=(0, (kernelSize - 1) // 2), groups=inchannel, bias=False)
         self.bn2 = nn.BatchNorm2d(inchannel)
@@ -157,7 +161,7 @@ class MicroBlockC(nn.Module):
         self.droprate = droprate
 
     def forward(self, x):
-        out = self.bn1(self.facdep_conv1(x))
+        out = self.relu1(self.bn1(self.facdep_conv1(x)))
         out = self.bn2(self.facdep_conv2(out))
         out = self.dysmax1(out)
         if self.droprate > 0:

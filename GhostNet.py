@@ -262,7 +262,7 @@ if __name__ == '__main__':
     from torchvision import models
 
     # net = MicroNet.MicroNet_M1(0, 0.05, 1000)
-    net = ghostnet(num_classes=100, width=0.09)
+    net = ghostnet(num_classes=100, width=0.1)
     inputs = torch.randn(1, 3, 224, 224)
     flops, params = profile(net, (inputs,))
     print('flops: ', flops / 1e6, 'M  ', 'params: ', params / 1e6, 'M')

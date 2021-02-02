@@ -19,8 +19,9 @@ class MicroNet_M0(nn.Module):
                                     MicroBlockC(3, 384, 576, 96, (8, 12), 1, droprate))
         self.avg_pooling = nn.AvgPool2d(7)
         self.nchannels = 576
+
+        # 修改全连接层的规模大小以满足FLOPs的要求，
         self.fc1 = nn.Linear(576, int(576 // 0.5))
-        # 只在全连接层加上dropout
         self.droprate_fc = droprate_fc
         self.fc2 = nn.Linear(int(576 // 0.5), classNum)
 
