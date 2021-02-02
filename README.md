@@ -1,4 +1,4 @@
 # MicroNet
 MicroNet Recurrence
 
-![image](https://github.com/lizhen18THU/MicroNet/blob/master/pictures/result.JPG)
+![image](https://github.com/lizhen18THU/MicroNet/blob/master/reslts/result.JPG)
